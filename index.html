@@ -19,6 +19,8 @@
             <h1>Dapoer Inge Order App</h1>
         </header>
 
+        <button type="button" class="refresh-btn" onclick="window.location.reload()">Refresh</button>
+
         <section class="card">
             <h2>Today's Order</h2>
             <div class="table-container">
@@ -92,7 +94,6 @@
         <section class="card">
             <div class="flex-row">
                 <h2>Menu</h2>
-                <button type="button" class="refresh-btn" onclick="fetchMenu()">🔄 Refresh</button>
             </div>
             
             <input type="text" id="menu-search" placeholder="Search menu..." onkeyup="filterMenu()" style="margin-bottom: 15px; width: 100%;">
@@ -101,7 +102,7 @@
                 </div>
 
             <div class="custom-menu-section" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                <button type="button" class="custom-menu-btn" onclick="toggleCustomMenu()">+ Add Custom Menu (Non DB)</button>
+                <button type="button" class="submit-btn" onclick="toggleCustomMenu()">+ Add Custom Menu (Non DB)</button>
                 
                 <div id="custom-menu-group" class="hidden" style="margin-top: 10px;">
                     <div class="form-group">

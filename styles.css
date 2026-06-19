@@ -6,6 +6,8 @@
     --text-main: #1f2937;
     --text-muted: #6b7280;
     --border: #e5e7eb;
+    --refresh: #8ed40d;
+    --refresh-hover: #699b0a;
 }
 
 * {
@@ -160,3 +162,21 @@ input, select {
 }
 
 .submit-btn:hover { background-color: var(--primary-hover); }
+
+/* Submit Button */
+.refresh-btn {
+    background-color: var(--refresh);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+.refresh-btn:hover {
+    background-color: var(--refresh-hover);
+}
