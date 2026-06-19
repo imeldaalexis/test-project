@@ -6,6 +6,12 @@
     <title>Dapoer Inge Order App</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Memastikan class hidden berfungsi jika belum ada di styles.css */
+        .hidden { display: none !important; }
+        .flex-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .custom-menu-btn { background-color: #f0f0f0; border: 1px solid #ccc; padding: 5px 10px; cursor: pointer; border-radius: 4px;}
+    </style>
 </head>
 <body>
     <main class="app-container">
@@ -40,13 +46,18 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="customer-phone">Phone</label>
+                    <input type="tel" id="customer-phone" required placeholder="Enter your phone number">
+                </div>
+
+                <div class="form-group">
                     <label for="batch-time">Batch Time</label>
                     <select id="batch-time" required>
                         <option value="" disabled selected>Select time...</option>
-                        <option value="12.30-13.00">12.30-13.00</option>
-                        <option value="14.00-14.30">14.00-14.30</option>
-                        <option value="18.30-19.00">18.30-19.00</option>
-                        <option value="20.00-20.30">20.00-20.30</option>
+                        <option value="Jam 1">Jam 1</option>
+                        <option value="Jam Setengah 3">Jam Setengah 3</option>
+                        <option value="Jam 7">Jam 7</option>
+                        <option value="Jam Setengah 9">Jam Setengah 9</option>
                     </select>
                 </div>
 
@@ -79,10 +90,32 @@
         </section>
 
         <section class="card">
-            <h2>Menu</h2>
-            <input type="text" id="menu-search" placeholder="Search menu..." onkeyup="filterMenu()">
+            <div class="flex-row">
+                <h2>Menu</h2>
+                <button type="button" class="refresh-btn" onclick="fetchMenu()">🔄 Refresh</button>
+            </div>
+            
+            <input type="text" id="menu-search" placeholder="Search menu..." onkeyup="filterMenu()" style="margin-bottom: 15px; width: 100%;">
+            
             <div id="menu-list" class="menu-list">
                 </div>
+
+            <div class="custom-menu-section" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                <button type="button" class="custom-menu-btn" onclick="toggleCustomMenu()">+ Add Custom Menu (Non DB)</button>
+                
+                <div id="custom-menu-group" class="hidden" style="margin-top: 10px;">
+                    <div class="form-group">
+                        <label for="custom-menu-name">Custom Menu Name</label>
+                        <input type="text" id="custom-menu-name" placeholder="Enter custom menu name...">
+                    </div>
+                    <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <span>Quantity:</span>
+                        <button type="button" class="qty-btn" onclick="updateCustomQty(-1)">-</button>
+                        <span id="custom-qty-display">0</span>
+                        <button type="button" class="qty-btn" onclick="updateCustomQty(1)">+</button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <button class="submit-btn" onclick="submitOrder()">Submit Order</button>

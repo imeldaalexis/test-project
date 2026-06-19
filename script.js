@@ -3,18 +3,39 @@ const SUPABASE_URL = 'https://fkwpgzzycqvkefocmgil.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_qeFfUpOZZfGGLqEu0HWngw_VJX0UoFa';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// 2. Menu Data State
+// 2. State Data
 let menuData = [];
 let currentOrders = [];
 let sortDirection = 1;
+let customMenuQty = 0; // State untuk jumlah menu custom
 
 // 3. UI Initialization
 document.addEventListener('DOMContentLoaded', () => {
-    renderMenu();
+    fetchMenu();
     fetchOrders();
 });
 
-// 4. Menu Rendering & Logic
+// 4. Menu Fetching, Rendering & Logic
+async function fetchMenu() {
+    const { data, error } = await supabaseClient
+        .from('menus')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching menu:', error);
+        return;
+    }
+
+    menuData = data.map(item => ({
+        ...item,
+        qty: 0
+    }));
+
+    renderMenu();
+}
+
 function renderMenu(filterText = '') {
     const menuContainer = document.getElementById('menu-list');
     menuContainer.innerHTML = '';
@@ -51,15 +72,24 @@ function filterMenu() {
     renderMenu(text);
 }
 
-// 5. Form Logic
+// 5. Custom Menu Logic (NON DB)
+function toggleCustomMenu() {
+    const customGroup = document.getElementById('custom-menu-group');
+    customGroup.classList.toggle('hidden');
+}
+
+function updateCustomQty(change) {
+    customMenuQty += change;
+    if (customMenuQty < 0) customMenuQty = 0;
+    document.getElementById('custom-qty-display').innerText = customMenuQty;
+}
+
+// 6. Form Logic
 function toggleOtherLocation() {
     const locSelect = document.getElementById('location');
     const otherGroup = document.getElementById('other-location-group');
-
-    console.log("Fungsi jalan! Value saat ini:", locSelect.value);
     
     if (locSelect.value === 'Others') {
-        console.log("Others is clicked");
         otherGroup.classList.remove('hidden');
         document.getElementById('other-location').required = true;
     } else {
@@ -69,7 +99,7 @@ function toggleOtherLocation() {
     }
 }
 
-// 6. Fetch & Display Orders
+// 7. Fetch & Display Orders
 async function fetchOrders() {
     const { data, error } = await supabaseClient
         .from('orders')
@@ -100,7 +130,7 @@ function renderTable() {
 }
 
 function sortTable(column) {
-    sortDirection *= -1; // Toggle between ascending and descending
+    sortDirection *= -1;
     currentOrders.sort((a, b) => {
         let valA = a[column].toLowerCase();
         let valB = b[column].toLowerCase();
@@ -111,7 +141,7 @@ function sortTable(column) {
     renderTable();
 }
 
-// 7. Submit Logic
+// 8. Submit Logic
 async function submitOrder() {
     const name = document.getElementById('customer-name').value.trim();
     const phone = document.getElementById('customer-phone').value.trim();
@@ -127,14 +157,28 @@ async function submitOrder() {
         return;
     }
 
-    // Filter items with qty > 0 and format string
+    // 1. Kumpulkan menu dari DB
     const selectedItems = menuData.filter(item => item.qty > 0);
-    if (selectedItems.length === 0) {
-        alert("Please select at least one menu item.");
-        return;
+    let orderString = selectedItems.map(item => `${item.name} (${item.qty})`).join(', ');
+
+    // 2. Cek dan tambahkan Custom Menu jika ada
+    const customMenuName = document.getElementById('custom-menu-name').value.trim();
+    
+    if (customMenuQty > 0) {
+        if (!customMenuName) {
+            alert("Please enter a name for your custom menu item.");
+            return;
+        }
+        const customString = `${customMenuName} (${customMenuQty})`;
+        // Jika orderString sudah ada isinya, gabungkan dengan koma, jika tidak, pakai customString saja
+        orderString = orderString ? `${orderString}, ${customString}` : customString;
     }
 
-    const orderString = selectedItems.map(item => `${item.name} (${item.qty})`).join(', ');
+    // Validasi akhir jika tidak ada menu sama sekali yang dipilih
+    if (!orderString) {
+        alert("Please select at least one menu item (or add a custom menu).");
+        return;
+    }
 
     // Push to Supabase
     const { data, error } = await supabaseClient
@@ -148,41 +192,22 @@ async function submitOrder() {
         alert('Failed to submit order.');
     } else {
         alert('Order submitted successfully!');
-        // Reset form and quantities
+        
+        // Reset form utama
         document.getElementById('order-form').reset();
         document.getElementById('other-location-group').classList.add('hidden');
+        
+        // Reset state & UI menu DB
         menuData.forEach(item => item.qty = 0);
         renderMenu(); 
         
-        // Refresh table
+        // Reset state & UI Custom Menu
+        customMenuQty = 0;
+        document.getElementById('custom-qty-display').innerText = customMenuQty;
+        document.getElementById('custom-menu-name').value = '';
+        document.getElementById('custom-menu-group').classList.add('hidden');
+        
+        // Refresh table orders
         fetchOrders();
     }
 }
-
-// Tambahkan fungsi fetchMenu()
-async function fetchMenu() {
-    const { data, error } = await supabaseClient
-        .from('menus')
-        .select('*')
-        .eq('is_available', true) // Hanya ambil menu yang tersedia
-        .order('created_at', { ascending: true });
-
-    if (error) {
-        console.error('Error fetching menu:', error);
-        return;
-    }
-
-    // Mapping data dari DB dan tambahkan properti qty = 0 untuk state keranjang
-    menuData = data.map(item => ({
-        ...item,
-        qty: 0
-    }));
-
-    renderMenu(); // Panggil renderMenu setelah data berhasil ditarik
-}
-
-// Update UI Initialization untuk memanggil fetchMenu terlebih dahulu
-document.addEventListener('DOMContentLoaded', () => {
-    fetchMenu();
-    fetchOrders();
-});
