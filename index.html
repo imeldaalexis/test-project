@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dapoer Inge Order App</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <main class="app-container">
+        <header>
+            <h1>Dapoer Inge Order App</h1>
+        </header>
+
+        <section class="card">
+            <h2>Today's Order</h2>
+            <div class="table-container">
+                <table id="orders-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('name')">Name ↕</th>
+                            <th onclick="sortTable('location')">Location ↕</th>
+                            <th onclick="sortTable('order_details')">Order ↕</th>
+                            <th onclick="sortTable('batch_time')">Time ↕</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-body">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Order Here</h2>
+            <form id="order-form">
+                <div class="form-group">
+                    <label for="customer-name">Name</label>
+                    <input type="text" id="customer-name" required placeholder="Enter your name">
+                </div>
+
+                <div class="form-group">
+                    <label for="batch-time">Batch Time</label>
+                    <select id="batch-time" required>
+                        <option value="" disabled selected>Select time...</option>
+                        <option value="12.30-13.00">12.30-13.00</option>
+                        <option value="14.00-14.30">14.00-14.30</option>
+                        <option value="18.30-19.00">18.30-19.00</option>
+                        <option value="20.00-20.30">20.00-20.30</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <select id="location" required onchange="toggleOtherLocation()">
+                        <option value="" disabled selected>Select location...</option>
+                        <option value="Asrama A">Asrama A</option>
+                        <option value="Asrama B">Asrama B</option>
+                        <option value="Asrama C">Asrama C</option>
+                        <option value="Asrama D">Asrama D</option>
+                        <option value="Asrama E">Asrama E</option>
+                        <option value="Asrama F">Asrama F</option>
+                        <option value="Asrama G">Asrama G</option>
+                        <option value="Asrama H">Asrama H</option>
+                        <option value="Asrama I">Asrama I</option>
+                        <option value="Asrama J">Asrama J</option>
+                        <option value="Asrama K">Asrama K</option>
+                        <option value="Asrama L">Asrama L</option>
+                        <option value="Asrama M">Asrama M</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group hidden" id="other-location-group">
+                    <label for="other-location">Specify Location</label>
+                    <input type="text" id="other-location" placeholder="Enter your address">
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Menu</h2>
+            <input type="text" id="menu-search" placeholder="Search menu..." onkeyup="filterMenu()">
+            <div id="menu-list" class="menu-list">
+                </div>
+        </section>
+
+        <button class="submit-btn" onclick="submitOrder()">Submit Order</button>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
