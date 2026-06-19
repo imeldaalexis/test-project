@@ -89,7 +89,7 @@ function toggleOtherLocation() {
     const locSelect = document.getElementById('location');
     const otherGroup = document.getElementById('other-location-group');
     
-    if (locSelect.value === 'Others') {
+    if (locSelect?.value === 'Others') {
         otherGroup.classList.remove('hidden');
         document.getElementById('other-location').required = true;
     } else {
@@ -143,16 +143,17 @@ function sortTable(column) {
 
 // 8. Submit Logic
 async function submitOrder() {
-    const name = document.getElementById('customer-name').value.trim();
-    const phone = document.getElementById('customer-phone').value.trim();
-    const batchTime = document.getElementById('batch-time').value;
-    let location = document.getElementById('location').value;
+    // Pakai ?. dan || '' biar kebal error kalau elemen nggak ada
+    const name = document.getElementById('customer-name')?.value.trim() || '';
+    const batchTime = document.getElementById('batch-time')?.value || '';
+    let location = document.getElementById('location')?.value || '';
     
     if (location === 'Others') {
-        location = document.getElementById('other-location').value.trim();
+        location = document.getElementById('other-location')?.value.trim() || '';
     }
 
-    if (!name || !phone || !batchTime || !location) {
+    // Validasi sudah nggak ngecek phone lagi
+    if (!name || !batchTime || !location) {
         alert("Please fill in all required fields.");
         return;
     }
@@ -161,8 +162,8 @@ async function submitOrder() {
     const selectedItems = menuData.filter(item => item.qty > 0);
     let orderString = selectedItems.map(item => `${item.name} (${item.qty})`).join(', ');
 
-    // 2. Cek dan tambahkan Custom Menu jika ada
-    const customMenuName = document.getElementById('custom-menu-name').value.trim();
+    // 2. Cek dan tambahkan Custom Menu jika ada (pakai ?. juga)
+    const customMenuName = document.getElementById('custom-menu-name')?.value.trim() || '';
     
     if (customMenuQty > 0) {
         if (!customMenuName) {
@@ -180,11 +181,11 @@ async function submitOrder() {
         return;
     }
 
-    // Push to Supabase
+    // Push to Supabase (nggak ada phone yang dikirim)
     const { data, error } = await supabaseClient
         .from('orders')
         .insert([
-            { name, phone, batch_time: batchTime, location, order_details: orderString }
+            { name, batch_time: batchTime, location, order_details: orderString }
         ]);
 
     if (error) {
@@ -194,8 +195,10 @@ async function submitOrder() {
         alert('Order submitted successfully!');
         
         // Reset form utama
-        document.getElementById('order-form').reset();
-        document.getElementById('other-location-group').classList.add('hidden');
+        const orderForm = document.getElementById('order-form');
+        if (orderForm) orderForm.reset();
+        
+        document.getElementById('other-location-group')?.classList.add('hidden');
         
         // Reset state & UI menu DB
         menuData.forEach(item => item.qty = 0);
@@ -203,9 +206,13 @@ async function submitOrder() {
         
         // Reset state & UI Custom Menu
         customMenuQty = 0;
-        document.getElementById('custom-qty-display').innerText = customMenuQty;
-        document.getElementById('custom-menu-name').value = '';
-        document.getElementById('custom-menu-group').classList.add('hidden');
+        const customQtyDisplay = document.getElementById('custom-qty-display');
+        if (customQtyDisplay) customQtyDisplay.innerText = customMenuQty;
+        
+        const customNameInput = document.getElementById('custom-menu-name');
+        if (customNameInput) customNameInput.value = '';
+        
+        document.getElementById('custom-menu-group')?.classList.add('hidden');
         
         // Refresh table orders
         fetchOrders();
